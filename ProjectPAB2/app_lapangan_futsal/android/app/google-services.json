@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "66340898524",
+    "project_id": "futsalapp-1c440",
+    "storage_bucket": "futsalapp-1c440.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:66340898524:android:1976b349262e79f784d619",
+        "android_client_info": {
+          "package_name": "com.example.app_lapangan_futsal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "66340898524-nnnrh89u300b4apf7lc97vc9obml8eeu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtQUdOUEl30uqyyhG8IHu462_61u7OCpA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "66340898524-nnnrh89u300b4apf7lc97vc9obml8eeu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
