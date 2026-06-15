@@ -207,7 +207,9 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
                       child: Container(
                         height: 200,
                         decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.grey[850] :Colors.grey.shade200,
+                          color: isDarkMode
+                              ? Colors.grey[850]
+                              : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey),
                         ),
@@ -243,7 +245,9 @@ class _AddFieldScreenState extends State<AddFieldScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.grey[850] :Colors.blue.shade50,
+                        color: isDarkMode
+                            ? Colors.grey[850]
+                            : Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
