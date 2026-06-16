@@ -60,10 +60,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             .doc(currentUser.uid)
             .get();
 
+        // jadikan nama akun google sebagai nilai awal
+        username = currentUser.displayName ?? 'PenggunaBaru';
+
         if (userDoc.exists) {
           final data = userDoc.data() as Map<String, dynamic>;
-          username = data['username'] ?? '';
-          phoneNumber = data['phone'] ?? '';
+          // Hanya timpa username jika di Firestore datanya ada
+          if (data['username'] != null &&
+              data['username'].toString().trim().isNotEmpty) {
+            username = data['username'];
+          }
 
           String? imagePath = data['profile_image_local_path'];
           if (imagePath != null && imagePath.isNotEmpty) {

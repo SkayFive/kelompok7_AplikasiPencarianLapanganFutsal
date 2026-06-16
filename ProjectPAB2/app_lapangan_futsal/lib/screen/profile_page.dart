@@ -342,14 +342,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             await FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(currentUser!.uid)
-                                .update({
+                                .set({
                                   'username': username,
                                   'email': email,
                                   'phone': phoneNumber,
                                   if (!kIsWeb && _profileImage != null)
                                     'profile_image_local_path':
                                         _profileImage!.path,
-                                });
+                                }, SetOptions(merge: true));
 
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
