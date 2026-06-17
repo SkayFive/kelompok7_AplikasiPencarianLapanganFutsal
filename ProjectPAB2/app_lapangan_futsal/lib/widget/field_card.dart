@@ -9,6 +9,7 @@ class FieldCard extends StatelessWidget {
 
   final bool isAdmin;
   final VoidCallback? onDelete;
+  final VoidCallback? onShare;
 
   const FieldCard({
     super.key,
@@ -16,6 +17,7 @@ class FieldCard extends StatelessWidget {
     this.onFavoriteChanged,
     this.isAdmin = false,
     this.onDelete,
+    this.onShare,
   });
 
   // Fungsi pembantu untuk memuat gambar agar kode tetap rapi
@@ -147,36 +149,66 @@ class FieldCard extends StatelessWidget {
               ),
 
               // logika titik tiga
-              if (isAdmin)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
-                      shape: BoxShape.circle,
-                    ),
-                    child: PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Colors.white),
-                      onSelected: (value) {
-                        if (value == 'delete') {
-                          if (onDelete != null) {
-                            onDelete!();
-                          }
+              // if (isAdmin) --> Hapus batasan "if (isAdmin)" agar ikon selalu muncul
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        if (onDelete != null) {
+                          onDelete!();
                         }
-                      },
-                      itemBuilder: (context) => [
+                      } else if (value == 'share') {
+                        if (onShare != null) {
+                          onShare!();
+                        }
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      if (isAdmin)
                         const PopupMenuItem(
                           value: 'delete',
-                          child: Text(
-                            'Hapus Lapangan',
-                            style: TextStyle(color: Colors.red),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_outlined,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Hapus Lapangan',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+
+                      const PopupMenuItem(
+                        value: 'share',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.share_outlined,
+                              color: Colors.blue,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text('Bagikan Lapangan'),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
             ],
           ),
         ),

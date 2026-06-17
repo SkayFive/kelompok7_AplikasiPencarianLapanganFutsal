@@ -7,6 +7,7 @@ import 'package:app_lapangan_futsal/screen/favorite_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   final GlobalKey<FavoriteScreenState> favoriteKey;
@@ -263,6 +264,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         return FieldCard(
                           field: field,
                           isAdmin: isAdmin,
+                          // Logika Share
+                          onShare: () {
+                            final String appLink = 'http://localhost:5000';
+
+                            final String shareText =
+                                'HEY ANTEK ANTEK ASING Ayo main futsal di *${field.name}*!\n\n'
+                                '📍 Lokasi: ${field.address}\n'
+                                '💰 Harga: ${field.price}\n'
+                                '📞 Hubungi: ${field.phone}\n\n'
+                                'Cari tau lebih lanjut di aplikasi FutsalFinder!\n'
+                                '$appLink';
+
+                            Share.share(shareText);
+                          },
+
+                          // Logika Delete
                           onDelete: () async {
                             // konfirmasi dialog
                             final confirm = await showDialog(
