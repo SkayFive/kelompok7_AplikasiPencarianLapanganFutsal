@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
-// import 'package:_flutterfire_internals/_flutterfire_internals.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class AddTournamentScreen extends StatefulWidget {
   const AddTournamentScreen({super.key});
@@ -17,13 +19,56 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
   // Controllers
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
-  final _quotaController = TextEditingController();
   final _dateController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  // variabel baru tempat menampung pilihan kuota resmi (menggantikan quotaController)
+  int? _selectedQuota;
+
+  // Daftar kuota standar turnament futsal
+  final List<int> _quotaOptions = [2, 3, 4, 8, 16, 32, 64];
 
   String? _base64Image;
   bool _isLoading = false;
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _priceController.dispose();
+    _dateController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  // fungsi digunakan untuk membuka kalender (Date picker)
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.blue.shade700,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        // format tanggal '12 nov 2026'
+        _dateController.text = DateFormat('d MMM yyyy').format(picked);
+      });
+    }
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(
@@ -38,9 +83,13 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
   }
 
   Future<void> _saveTournament() async {
-    if (!_formKey.currentState!.validate() || _base64Image == null) {
+    if (!_formKey.currentState!.validate() ||
+        _base64Image == null ||
+        _selectedQuota == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lengkapi data dan foto poster!')),
+        const SnackBar(
+          content: Text('Lengkapi data, kuota tim, dan foto poster!'),
+        ),
       );
       return;
     }
@@ -50,8 +99,9 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
     try {
       await FirebaseFirestore.instance.collection('tournaments').add({
         'title': _titleController.text.trim(),
-        'price': _priceController.text.trim(),
-        'quota': int.tryParse(_quotaController.text) ?? 0,
+        'price': 'Rp ${_priceController.text.trim()}',
+        // kuota yang dipilih dari Dropdown
+        'quota': _selectedQuota,
         'joined': 0, // Default awal
         'date': _dateController.text.trim(),
         'description': _descriptionController.text.trim(),
@@ -101,7 +151,11 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
                                 base64Decode(_base64Image!),
                                 fit: BoxFit.cover,
                               )
-                            : const Icon(Icons.add_photo_alternate, size: 50, color: Colors.grey,),
+                            : const Icon(
+                                Icons.add_photo_alternate,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -127,47 +181,13 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
                     TextFormField(
                       controller: _priceController,
                       cursorColor: Colors.blue,
-                      decoration: InputDecoration(
-                        hintText: 'Harga (Contoh: Rp 100.000)',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade300,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    TextFormField(
-                      controller: _quotaController,
-                      cursorColor: Colors.blue,
-                      decoration: InputDecoration(
-                        hintText: 'Kuota Peserta',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.blue.shade300,
-                            width: 2,
-                          ),
-                        ),
-                      ),
                       keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 12),
-
-                    TextFormField(
-                      controller: _dateController,
-                      cursorColor: Colors.blue,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        RupiahInputFormatter(),
+                      ],
                       decoration: InputDecoration(
-                        hintText: 'Tanggal (Contoh: Monday, 3 Nov 2025)',
+                        hintText: 'Isi harga tournament',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -179,6 +199,71 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
                           ),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<int>(
+                            value: _selectedQuota,
+                            decoration: InputDecoration(
+                              hintText: 'Kuota team',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.blue.shade300,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            items: _quotaOptions.map((int quota) {
+                              return DropdownMenuItem<int>(
+                                value: quota,
+                                child: Text('$quota Team'),
+                              );
+                            }).toList(),
+                            onChanged: (int? newValue) {
+                              setState(() {
+                                _selectedQuota = newValue;
+                              });
+                            },
+                            validator: (value) =>
+                                value == null ? 'Wajib pilih Kuota' : null,
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        Expanded(
+                          child: TextFormField(
+                            controller: _dateController,
+                            readOnly: true, // Buat agar form tidak bisa diklik
+                            cursorColor: Colors.blue,
+                            onTap: () =>
+                                _selectDate(context), // panggil fungsi kalender
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.calendar_month_outlined),
+                              hintText: 'Pilih Tanggal Turnament',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.blue.shade300,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            validator: (value) =>
+                                value!.isEmpty ? 'Wajib memilih tanggal' : null,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
 
@@ -199,6 +284,8 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
                         ),
                       ),
                       maxLines: 3,
+                      validator: (value) =>
+                          value!.isEmpty ? 'Wajib diisi' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -211,12 +298,43 @@ class _AddTournamentScreenState extends State<AddTournamentScreen> {
                         ),
                       ),
                       onPressed: _saveTournament,
-                      child: const Text('Simpan Turnamen', style: TextStyle(color: Colors.white),),
+                      child: const Text(
+                        'Simpan Turnamen',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
+    );
+  }
+}
+
+// Formatter khusus untuk membuat titik otomatis pada harga
+class RupiahInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    // Bersihkan titik lama
+    String cleanedText = newValue.text.replaceAll('.', '');
+
+    // Pola regex
+    RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    String newText = cleanedText.replaceAllMapped(
+      reg,
+      (Match match) => '${match[1]}.',
+    );
+
+    return newValue.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
     );
   }
 }

@@ -224,6 +224,9 @@ class TournamentCard extends StatelessWidget {
                             );
                           }
 
+                          // cek apakah kuota sudah penuh
+                          bool isQuotaFull = item.joined >= item.quota;
+
                           // kalau user sudah mendaftar
                           if (subSnapshot.hasData && subSnapshot.data!.exists) {
                             final regData =
@@ -249,10 +252,10 @@ class TournamentCard extends StatelessWidget {
                               return ElevatedButton.icon(
                                 onPressed: null, // Disabled
                                 icon: const Icon(
-                                  Icons.hourglass_empty,
+                                  Icons.access_time,
                                   color: Colors.orange,
                                 ),
-                                label: const Text('Status: Menunggu'),
+                                label: const Text('Menunggu'),
                                 style: ElevatedButton.styleFrom(
                                   disabledBackgroundColor:
                                       Colors.orange.shade100,
@@ -261,6 +264,19 @@ class TournamentCard extends StatelessWidget {
                                 ),
                               );
                             }
+                          }
+
+                          // Kalau user belum mendaftar tapi kuota sudah penuh
+                          if (isQuotaFull) {
+                            return ElevatedButton.icon(
+                              onPressed: null,
+                              icon: const Icon(Icons.block, color: Colors.red),
+                              label: const Text('Kuota Penuh'),
+                              style: ElevatedButton.styleFrom(
+                                disabledBackgroundColor: Colors.red.shade100,
+                                disabledForegroundColor: Colors.red.shade800,
+                              ),
+                            );
                           }
 
                           // kalau User belum mendaftar

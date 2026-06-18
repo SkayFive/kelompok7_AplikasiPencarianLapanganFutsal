@@ -41,10 +41,10 @@ class _FirstPageState extends State<FirstPage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.transparent, 
+                  Colors.transparent,
                   Colors.black.withOpacity(0.76),
                   Colors.black.withOpacity(0.96),
-                  Colors.black.withOpacity(1.00)
+                  Colors.black.withOpacity(1.00),
                 ],
                 stops: [0.00, 0.35, 0.99, 1.00],
               ),
@@ -140,7 +140,6 @@ class _FirstPageState extends State<FirstPage> {
                             ),
                           ),
                           const SizedBox(height: 40),
-
                         ],
                       ),
                     ),
